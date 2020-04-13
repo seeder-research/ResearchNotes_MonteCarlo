@@ -1,0 +1,53 @@
+\chapter{Statistics of Monte Carlo Simulations}
+
+Many applications for electronic design require the estimation of failure probabilities as the first step to determining its manufacturing yield. The most common approach to analyzing the yield of any electronic circuit is the \emph{Monte Carlo method}. In the Monte Carlo approach, $N$ number of simulations are run. Circuit parameters are randomly chosen prior to each simulation run. The number of failures observed among the $N$ samples, $x$, is used as an \emph{estimator}, $\hat{p}=\frac{x}{N}$ , for the \emph{true failure probability of the circuit}, $p$. However, how do we choose the value of $N$? We can na\"{i}vely choose $N$ such that for the expected value of $\hat{p}$, we will get $x=1$.
+
+Note, however, that the observation of $x$ failures among $N$ trials, where the probability of failure is $\hat{p}$, is a \emph{binomial process}. The probability of observing $x=1$ for $N$ number of trials with probability of failure, $\hat{p}$, is
+\begin{IEEEeqnarray}{C}
+p_\text{observation} = \left(^{N}_{1}\right)\left(1-\hat{p}\right)^{N-1}\hat{p} = N\left(1-\hat{p}\right)^{N-1}\hat{p}
+\end{IEEEeqnarray}When the event is rare (\emph{e.g.} $\hat{p}=p\approx{}10^{-9}$), $p_{observation}$ quickly falls to zero, which implies that any observed failure in our sample may occur purely by chance. Thus, we need a better method to determine $N$.
+
+Another problem that arises is that for every sample of $N$ trials, the obtained value for $x$ will vary. Thus, if we sample across various $N$ trials, we will obtain a distribution of values for $\hat{p}$ since many permutations of observations are possible. Recall that we are using $\hat{p}$ as an estimate for the true failure probability, $p$. If the distribution of $\hat{p}$ is large, it is possible that our estimation of the true value of $p$ is large. Thus, we will also need to choose $N$ such that we can bound the error in estimating $p$.
+
+Let us model the number of observed failures in $N$ samples using the random variable $X$. Then, $X$ is a binomial random variable and $0{\leq}X{\leq}N$, $X{\subseteq}\mathbb{Z}$. If the probability of observing a failure event, $p$, is small, we will require a large $N$ before observing any failure event. However, when $N$ is large and the probability of failure, $p$, is small, it can be very numerically challenging to calculate the true probability of $X$ since
+\begin{IEEEeqnarray}{C}
+P\left(X\right) = \left(^{N}_{X}\right)\left(1-p\right)^{N-X}p^{X}.
+\end{IEEEeqnarray}For example, if $p = 10^{-9}$, it becomes numerically challenging to calculate $(1-p)^{N-X}$. Alternatively, if we have an estimated value of $p$, we can use the probability distribution function (PDF) of a normal distribution to approximate the PDF of $X$ (up to nearly $\pm3\sigma$ around the mean) provided that $N$ was chosen such that $Np{\geq}5$ and $N(1-p){\geq}5$. We may then apply the \emph{Z}-test to estimate the probability of making the observation of $X$ within a certain range. Doing so also estimates the error between $\hat{p}=\frac{\left<X\right>}{N}$ and $p$.
+
+The following example illustrates how the method works. First, we estimate $p$ from our simulation of $N$ trials using $\hat{p}=\frac{X}{N}$. Since $X$ follows a binomial distribution, if we are able to collect a record of $\hat{p}$ obtained between different simulations of $N$ trials, we will observe that $\hat{p}$ is a random variable with a variance of $\frac{\hat{p}\left(1-\hat{p}\right)}{N}$. Thus, the distribution of $\hat{p}$ may be approximated using a normal distribution, having variance and mean of $\frac{\hat{p}\left(1-\hat{p}\right)}{N}$ and $\hat{p}=\frac{X}{N}$, respectively. Note that the the standard deviation (or \emph{standard error}) is $\sqrt{\frac{\hat{p}\left(1-\hat{p}\right)}{N}}$. The true failure probability, $p$, can then be calculated as $p=\left<\hat{p}\right>$. However, we only have one value of $\hat{p}$, which means we are not able to determine $\left<\hat{p}\right>$.
+
+Alternatively, we can find a range $\left[\hat{p}-p',~\hat{p}+p'\right]$ (and $p'{\geq}0$) in which $p$ should be in. So how do we determine the value of $p'$ and the probability of finding $p$ in that range (i.e., $P\left(\hat{p}-p'{\leq}p{\leq}\hat{p}+p'\right)$)? The approximation of the binomial distribution using the normal distribution allows us to estimate $P\left(\frac{X}{N}-p'{\leq}\hat{p}{\leq}\frac{X}{N}+p'\right)$, which is the probability of observing $\hat{p}$ in the range $\left[\frac{X}{N}-p',~\frac{X}{N}+p'\right]$ in a single simulation of $N$ trials. In statistical terms, $P\left(\frac{X}{N}-p'{\leq}\hat{p}{\leq}\frac{X}{N}+p'\right)$ gives us the \emph{confidence level} of our estimation (\emph{i.e.} $p$, is in the range, $\left[\frac{X}{N}-p',~\frac{X}{N}+p'\right]$). Common choices of the confidence level are 0.8, 0.85, 0.9, 0.95, 0.99, and 0.999.
+
+\begin{table}[!t]
+\caption{Values of $Z_\text{score}$ for various confidence levels}
+\label{tab:z_score}
+\centering
+\begin{IEEEeqnarraybox}[\IEEEeqnarraystrutmode][c]{v/c/v/c/v}
+\IEEEeqnarrayrulerow \\
+& \text{Confidence level} && Z_\text{score} & \\
+\IEEEeqnarrayrulerow \\
+& \text{90\%} && 1.645 & \\
+\IEEEeqnarrayrulerow \\
+& \text{95\%} && 1.96 & \\
+\IEEEeqnarrayrulerow \\
+& \text{98\%} && 2.33 & \\
+\IEEEeqnarrayrulerow \\
+& \text{99\%} && 2.58 & \\
+\IEEEeqnarrayrulerow
+\end{IEEEeqnarraybox}
+\end{table}
+
+If a random variable, $Y$, follows the normal distribution with zero mean and unit variance, we can easily determine the probability of finding $Y$ in the range of $\pm{}Z_\text{score}$. For example, the probability of observing $Y$ in the range $\pm1.96$ is 0.95, since
+\begin{IEEEeqnarray}{C}
+P(Y\leq{}-1.96)=P(Y\geq{}1.95)=0.5\times(1-0.95)=0.025.
+\end{IEEEeqnarray}Here, $\pm{}1.96$ is the 95\% \emph{confidence interval} for $Y$. Given the probability we want of locating $p$ in the range $\hat{p}\pm{}p'$, we can calculate $p'$ by scaling $Z_\text{score}$ according to the relationship
+\begin{IEEEeqnarray}{C}
+p'=Z_\text{score}\sqrt{\frac{\hat{p}\left(1-\hat{p}\right)}{N}}.
+\end{IEEEeqnarray}For $\hat{p}=10^{-9}$, $N=10^{10}$, and $Z_\text{score}=1.96$, the 95\% confidence interval for $p$ is
+\begin{IEEEeqnarray}{C}
+10^{-9}\pm1.96\sqrt{\frac{10^{-9}\left(1-10^{-9}\right)}{10^{10}}}\approx{}10^{-9}\pm\left(6\times10^{-10}\right).
+\end{IEEEeqnarray}In the above example, $p$ is estimated to be $10^{-9}$ with an error of $\pm{}6{\times}10^{-10}$.
+
+If we want to bound the \emph{margin of error} ($p'$), the inequality $N\geq\left(\frac{Z_\text{score}}{p'}\right)^{2}\hat{p}\left(1-\hat{p}\right)$ gives us the minimum $N$ needed to calculate $\hat{p}$. For $\hat{p}=10^{-9}$, $p'=5\times10^{-10}$, and $Z_\text{score}=1.96$, we require \begin{IEEEeqnarray}{C}
+N\geq{}\frac{1.96^2}{0.25\times10^{-18}}\left(10^{-9}\right)\left(1-10^{-9}\right)\approx{}16\times10^{9}.
+\end{IEEEeqnarray}
